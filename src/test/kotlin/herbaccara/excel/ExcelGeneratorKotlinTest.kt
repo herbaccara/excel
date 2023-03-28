@@ -11,7 +11,7 @@ class ExcelGeneratorKotlinTest {
 
     @Test
     fun test2() {
-        val sxssExcelGenerator = SXSSExcelGenerator(Pojo::class.java)
+        val singleSheetExcelGenerator = SingleSheetExcelGenerator(Pojo::class.java)
         println()
     }
 

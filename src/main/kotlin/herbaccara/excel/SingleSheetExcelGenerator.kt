@@ -4,18 +4,18 @@ import herbaccara.excel.annotation.ExcelColumn
 import herbaccara.excel.annotation.ExcelSheet
 import herbaccara.excel.annotation.ExcelStyle
 import org.apache.poi.common.usermodel.HyperlinkType
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.usermodel.RichTextString
-import org.apache.poi.xssf.streaming.SXSSFSheet
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.OutputStream
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class SXSSExcelGenerator<T>(
-    clazz: Class<T>
+class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
+    clazz: Class<T>,
+    excelType: ExcelType = ExcelType.SXSSF
 ) : ExcelGenerator<T> {
 
     companion object {
@@ -23,8 +23,13 @@ class SXSSExcelGenerator<T>(
         private val DEFAULT_BODY_STYLE = "${this::class.java.name}.DEFAULT_BODY_STYLE"
     }
 
-    private val workbook: SXSSFWorkbook
-    private val sheet: SXSSFSheet
+    private val workbook: Workbook = when (excelType) {
+        ExcelType.HSSF -> HSSFWorkbook()
+        ExcelType.XSSF -> XSSFWorkbook()
+        ExcelType.SXSSF -> SXSSFWorkbook()
+    }
+
+    private val sheet: Sheet
     private var currentRowIndex: Int = 0
     private val cellInfos: List<CellInfo>
     private val styles: MutableMap<String, CellStyle> = mutableMapOf()
@@ -32,7 +37,6 @@ class SXSSExcelGenerator<T>(
     init {
         val excelSheet = clazz.getAnnotation(ExcelSheet::class.java) ?: throw IllegalArgumentException("")
 
-        workbook = SXSSFWorkbook()
         sheet = workbook.createSheet(excelSheet.value).apply {
             defaultColumnWidth = excelSheet.columnWidth
             defaultRowHeight = excelSheet.rowHeight
@@ -139,10 +143,10 @@ class SXSSExcelGenerator<T>(
 
     override fun write(os: OutputStream) {
         os.use {
-            workbook.run {
-                write(it)
-                close()
-                dispose()
+            workbook.write(it)
+            workbook.close()
+            if (workbook is SXSSFWorkbook) {
+                workbook.dispose()
             }
         }
     }

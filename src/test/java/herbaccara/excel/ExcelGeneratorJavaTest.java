@@ -10,13 +10,13 @@ import java.util.Arrays;
 public class ExcelGeneratorJavaTest {
 
     @Test
-    public void test2() throws IOException {
-        SXSSExcelGenerator<Pojo> sxssExcelGenerator = new SXSSExcelGenerator<>(Pojo.class);
-        sxssExcelGenerator.addRows(Arrays.asList(
+    public void test() throws IOException {
+        final ExcelGenerator<Pojo> excelGenerator = new SingleSheetExcelGenerator<>(Pojo.class);
+        excelGenerator.addRows(Arrays.asList(
                 new Pojo("가", "블라블라\b블~라~블~라~"),
                 new Pojo("다", null),
                 new Pojo("바", "https://www.google.com")
         ));
-        sxssExcelGenerator.write(Files.newOutputStream(new File("src/test/resources/test.xlsx").toPath()));
+        excelGenerator.write(Files.newOutputStream(new File("src/test/resources/test.xlsx").toPath()));
     }
 }
