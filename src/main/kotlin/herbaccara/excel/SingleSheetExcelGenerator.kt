@@ -3,6 +3,7 @@ package herbaccara.excel
 import herbaccara.excel.annotation.ExcelColumn
 import herbaccara.excel.annotation.ExcelSheet
 import herbaccara.excel.annotation.ExcelStyle
+import herbaccara.excel.annotation.Sort
 import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.*
@@ -48,7 +49,10 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
             .mapNotNull { field ->
                 val excelColumn = field.getAnnotation(ExcelColumn::class.java)
                 if (excelColumn != null) {
-                    CellInfo(field.apply { isAccessible = true }, excelColumn).also { cellInfo ->
+                    CellInfo(
+                        field.apply { isAccessible = true },
+                        ExcelColumn(excelColumn.value.ifBlank { field.name }, excelColumn.order)
+                    ).also { cellInfo ->
                         val excelStyle = field.getAnnotation(ExcelStyle::class.java)
                         if (excelStyle != null) {
                             createStyle(cellInfo.styleName(), excelStyle)
@@ -58,12 +62,18 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
                     null
                 }
             }
-            .sortedBy { it.excelColumn.order }
+            .let { items ->
+                when (excelSheet.fieldSort) {
+                    Sort.NONE -> items
+                    Sort.NAME -> items.sortedBy { it.excelColumn.value }
+                    Sort.ORDER -> items.sortedBy { it.excelColumn.order }
+                }
+            }
 
         val headerRow = sheet.createRow(currentRowIndex++)
         cellInfos.forEachIndexed { index, cellInfo ->
             val cell = headerRow.createCell(index)
-            cell.setCellValue(cellInfo.field.name)
+            cell.setCellValue(cellInfo.excelColumn.value)
             cell.cellStyle = styles[DEFAULT_HEADER_STYLE]
         }
     }

@@ -26,11 +26,11 @@ public class Pojo {
         this.bar = bar;
     }
 
-    @ExcelColumn(value = "푸", order = 1)
+    @ExcelColumn(value = "a푸")
     @ExcelStyle(fontBold = true)
     private String foo;
 
-    @ExcelColumn(value = "바", order = 2)
+    @ExcelColumn(value = "b파")
     private String bar;
 
     public String getFoo() {

@@ -8,5 +8,6 @@ annotation class ExcelSheet(
     val columnWidth: Int = 8,
     val rowHeight: Short = 300,
     val headerStyle: ExcelStyle = ExcelStyle(),
-    val bodyStyle: ExcelStyle = ExcelStyle()
+    val bodyStyle: ExcelStyle = ExcelStyle(),
+    val fieldSort: Sort = Sort.NONE
 )

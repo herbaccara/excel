@@ -4,6 +4,6 @@ package herbaccara.excel.annotation
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
 annotation class ExcelColumn(
-    val value: String,
+    val value: String = "",
     val order: Int = 0
 )
