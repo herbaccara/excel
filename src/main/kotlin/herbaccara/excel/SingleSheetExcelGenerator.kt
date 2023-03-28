@@ -62,6 +62,22 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
                         // 0 이면 한번도 설정을 안한 상태
                         if (style.dataFormat == 0.toShort()) {
                             val type = cellInfo.field.type
+//                            val floatTypes = Arrays.asList<Class<*>?>(
+//                                Float::class.java, Float::class.javaPrimitiveType,
+//                                Double::class.java, Double::class.javaPrimitiveType
+//                            ).contains(type)
+
+                            // kotlin 타입 java 타입 둘다 확인 해야 하는데.....?????????
+//                            val integerTypes = Arrays.asList<Class<*>?>(
+//                                Byte::class.java, Byte::class.javaPrimitiveType,
+//                                Short::class.java, Short::class.javaPrimitiveType,
+//                                Int::class.java, Int::class.javaPrimitiveType,
+//                                Integer::class.java, Integer::class.javaPrimitiveType,
+//                                Long::class.java, Long::class.javaPrimitiveType,
+//                                java.lang.Long::class.java
+//                            ).contains(type)
+//                            println()
+
                             // TODO : type 에 따른 dataFormat 처리
                         }
                         styles[cellInfo.styleName()] = style
