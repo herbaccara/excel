@@ -6,13 +6,26 @@ import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap
 import org.apache.poi.xssf.usermodel.XSSFColor
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.junit.jupiter.api.Test
+import java.io.File
+import java.nio.file.Files
 
 class ExcelGeneratorKotlinTest {
 
     @Test
     fun test2() {
-        val singleSheetExcelGenerator = SingleSheetExcelGenerator(Pojo::class.java)
-        println()
+        val excelGenerator: ExcelGenerator<Pojo2> = SingleSheetExcelGenerator(Pojo2::class.java)
+        excelGenerator.addRows(
+            listOf(
+//                Pojo2("가", "블라블라\b블~라~블~라~"),
+//                Pojo2("나", ""),
+//                Pojo2("다", "https://www.google.com"),
+//                Pojo2("라", "https://www.naver.com", 100000),
+                Pojo2("마", "https://www.naver.com", 100000).apply {
+                    this.costasd = 10
+                }
+            )
+        )
+        excelGenerator.write(Files.newOutputStream(File("src/test/resources/test.xlsx").toPath()))
     }
 
     @Test

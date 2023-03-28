@@ -3,9 +3,7 @@ package herbaccara.excel;
 import herbaccara.excel.annotation.ExcelColumn;
 import herbaccara.excel.annotation.ExcelSheet;
 import herbaccara.excel.annotation.ExcelStyle;
-import herbaccara.excel.annotation.ExcelStyleClass;
 import herbaccara.excel.style.BodyCellStyle;
-import herbaccara.excel.style.CostCellStyle;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -41,8 +39,19 @@ public class Pojo {
     private String bar;
 
     @ExcelColumn("비용")
-    @ExcelStyleClass(CostCellStyle.class)
+//    @ExcelStyleClass(CostCellStyle.class)
     private Integer cost;
+
+    @ExcelColumn("비용xxxxxxx")
+    private float asdasd = 0.1f;
+
+    public float getAsdasd() {
+        return asdasd;
+    }
+
+    public void setAsdasd(final float asdasd) {
+        this.asdasd = asdasd;
+    }
 
     public Integer getCost() {
         return cost;
