@@ -1,6 +1,7 @@
 package herbaccara.excel
 
 import herbaccara.excel.annotation.ExcelStyle
+import herbaccara.excel.style.ExcelCellStyle
 import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Cell
@@ -13,6 +14,8 @@ import java.io.OutputStream
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 
 abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<T> {
 
@@ -28,6 +31,12 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
     }
 
     protected abstract val styles: MutableMap<String, CellStyle>
+
+    protected fun createStyle(styleName: String, excelStyleClass: KClass<out ExcelCellStyle>) {
+        val createInstance = excelStyleClass.createInstance()
+        val cellStyle = createInstance.apply(workbook)
+        styles[styleName] = cellStyle
+    }
 
     protected fun createStyle(styleName: String, excelStyle: ExcelStyle) {
         if (ExcelStyle.isDefault(excelStyle)) return

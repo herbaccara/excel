@@ -1,9 +1,7 @@
 package herbaccara.excel
 
-import herbaccara.excel.annotation.ExcelColumn
-import herbaccara.excel.annotation.ExcelSheet
-import herbaccara.excel.annotation.ExcelStyle
-import herbaccara.excel.annotation.Sort
+import herbaccara.excel.annotation.*
+import herbaccara.excel.style.DefaultExcelCellStyle
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.Sheet
 
@@ -24,8 +22,20 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
             defaultColumnWidth = excelSheet.columnWidth
             defaultRowHeight = excelSheet.rowHeight
         }
-        createStyle(DEFAULT_HEADER_STYLE, excelSheet.headerStyle)
-        createStyle(DEFAULT_BODY_STYLE, excelSheet.bodyStyle)
+
+        // header style
+        if (excelSheet.headerStyleClass == DefaultExcelCellStyle::class) {
+            createStyle(DEFAULT_HEADER_STYLE, excelSheet.headerStyle)
+        } else {
+            createStyle(DEFAULT_HEADER_STYLE, excelSheet.headerStyleClass)
+        }
+
+        // body style
+        if (excelSheet.bodyStyleClass == DefaultExcelCellStyle::class) {
+            createStyle(DEFAULT_BODY_STYLE, excelSheet.bodyStyle)
+        } else {
+            createStyle(DEFAULT_BODY_STYLE, excelSheet.bodyStyleClass)
+        }
 
         cellInfos = clazz.declaredFields
             .mapNotNull { field ->
@@ -35,8 +45,12 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
                         field.apply { isAccessible = true },
                         ExcelColumn(excelColumn.value.ifBlank { field.name }, excelColumn.order)
                     ).also { cellInfo ->
+                        val excelStyleClass = field.getAnnotation(ExcelStyleClass::class.java)
                         val excelStyle = field.getAnnotation(ExcelStyle::class.java)
-                        if (excelStyle != null) {
+
+                        if (excelStyleClass != null) {
+                            createStyle(cellInfo.styleName(), excelStyleClass.value)
+                        } else if (excelStyle != null) {
                             createStyle(cellInfo.styleName(), excelStyle)
                         }
                     }
