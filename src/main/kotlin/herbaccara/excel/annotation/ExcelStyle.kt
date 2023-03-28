@@ -20,7 +20,8 @@ annotation class ExcelStyle(
     val borderStyle: BorderStyle = BorderStyle.NONE,
     val borderColor: IndexedColors = IndexedColors.BLACK, // 8
     val alignment: HorizontalAlignment = HorizontalAlignment.GENERAL,
-    val verticalAlignment: VerticalAlignment = VerticalAlignment.BOTTOM
+    val verticalAlignment: VerticalAlignment = VerticalAlignment.BOTTOM,
+    val dataFormat: String = ""
 ) {
     companion object {
         private val DefaultExcelStyle = ExcelStyle()

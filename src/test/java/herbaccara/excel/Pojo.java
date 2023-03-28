@@ -26,12 +26,30 @@ public class Pojo {
         this.bar = bar;
     }
 
+    public Pojo(final String foo, final String bar, final Integer cost) {
+        this.foo = foo;
+        this.bar = bar;
+        this.cost = cost;
+    }
+
     @ExcelColumn(value = "a푸")
     @ExcelStyle(fontBold = true)
     private String foo;
 
     @ExcelColumn(value = "b파")
     private String bar;
+
+    @ExcelColumn
+    @ExcelStyle(dataFormat = "#,##0")
+    private Integer cost;
+
+    public Integer getCost() {
+        return cost;
+    }
+
+    public void setCost(final Integer cost) {
+        this.cost = cost;
+    }
 
     public String getFoo() {
         return foo;

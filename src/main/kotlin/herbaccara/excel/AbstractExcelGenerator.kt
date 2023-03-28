@@ -62,6 +62,11 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
             leftBorderColor = excelStyle.borderColor.index
             rightBorderColor = excelStyle.borderColor.index
             bottomBorderColor = excelStyle.borderColor.index
+
+            if (excelStyle.dataFormat.isNotBlank()) {
+                val dataFormat = workbook.createDataFormat()
+                this.dataFormat = dataFormat.getFormat(excelStyle.dataFormat)
+            }
         }
 
         styles[styleName] = cellStyle
