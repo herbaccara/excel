@@ -39,7 +39,7 @@ public class Pojo {
     @ExcelColumn(value = "b파")
     private String bar;
 
-    @ExcelColumn
+    @ExcelColumn("비용")
     @ExcelStyle(dataFormat = "#,##0")
     private Integer cost;
 
