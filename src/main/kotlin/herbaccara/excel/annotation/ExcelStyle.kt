@@ -2,7 +2,7 @@ package herbaccara.excel.annotation
 
 import org.apache.poi.ss.usermodel.*
 
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FIELD)
+@Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
 annotation class ExcelStyle(
