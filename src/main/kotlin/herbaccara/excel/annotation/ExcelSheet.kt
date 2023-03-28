@@ -5,6 +5,8 @@ package herbaccara.excel.annotation
 @MustBeDocumented
 annotation class ExcelSheet(
     val value: String = "sheet",
-    val headerStyles: Array<ExcelStyle> = [],
-    val bodyStyles: Array<ExcelStyle> = []
+    val columnWidth: Int = 8,
+    val rowHeight: Short = 300,
+    val headerStyle: ExcelStyle = ExcelStyle(),
+    val bodyStyle: ExcelStyle = ExcelStyle()
 )

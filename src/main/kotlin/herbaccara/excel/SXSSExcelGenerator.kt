@@ -3,7 +3,9 @@ package herbaccara.excel
 import herbaccara.excel.annotation.ExcelColumn
 import herbaccara.excel.annotation.ExcelSheet
 import herbaccara.excel.annotation.ExcelStyle
+import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.RichTextString
 import org.apache.poi.xssf.streaming.SXSSFSheet
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
@@ -16,32 +18,87 @@ class SXSSExcelGenerator<T>(
     clazz: Class<T>
 ) : ExcelGenerator<T> {
 
+    companion object {
+        private val DEFAULT_HEADER_STYLE = "${this::class.java.name}.DEFAULT_HEADER_STYLE"
+        private val DEFAULT_BODY_STYLE = "${this::class.java.name}.DEFAULT_BODY_STYLE"
+    }
+
     private val workbook: SXSSFWorkbook
     private val sheet: SXSSFSheet
     private var currentRowIndex: Int = 0
     private val cellInfos: List<CellInfo>
+    private val styles: MutableMap<String, CellStyle> = mutableMapOf()
 
     init {
         val excelSheet = clazz.getAnnotation(ExcelSheet::class.java) ?: throw IllegalArgumentException("")
 
-        cellInfos = clazz.declaredFields.mapNotNull {
-            val excelColumn = it.getAnnotation(ExcelColumn::class.java)
-            if (excelColumn != null) {
-                val excelStyle = it.getAnnotation(ExcelStyle::class.java)
-                CellInfo(it.apply { isAccessible = true }, excelColumn, excelStyle)
-            } else {
-                null
-            }
-        }.sortedBy { it.excelColumn.order }
-
         workbook = SXSSFWorkbook()
-        sheet = workbook.createSheet(excelSheet.value)
+        sheet = workbook.createSheet(excelSheet.value).apply {
+            defaultColumnWidth = excelSheet.columnWidth
+            defaultRowHeight = excelSheet.rowHeight
+        }
+        createStyle(DEFAULT_HEADER_STYLE, excelSheet.headerStyle)
+        createStyle(DEFAULT_BODY_STYLE, excelSheet.bodyStyle)
+
+        cellInfos = clazz.declaredFields
+            .mapNotNull { field ->
+                val excelColumn = field.getAnnotation(ExcelColumn::class.java)
+                if (excelColumn != null) {
+                    CellInfo(field.apply { isAccessible = true }, excelColumn).also { cellInfo ->
+                        val excelStyle = field.getAnnotation(ExcelStyle::class.java)
+                        if (excelStyle != null) {
+                            createStyle(cellInfo.styleName(), excelStyle)
+                        }
+                    }
+                } else {
+                    null
+                }
+            }
+            .sortedBy { it.excelColumn.order }
 
         val headerRow = sheet.createRow(currentRowIndex++)
         cellInfos.forEachIndexed { index, cellInfo ->
             val cell = headerRow.createCell(index)
             cell.setCellValue(cellInfo.field.name)
+            cell.cellStyle = styles[DEFAULT_HEADER_STYLE]
         }
+    }
+
+    private fun createStyle(styleName: String, excelStyle: ExcelStyle) {
+        if (ExcelStyle.isDefault(excelStyle)) return
+
+        val font = workbook.createFont().apply {
+            if (excelStyle.fontName.isNotBlank()) {
+                fontName = excelStyle.fontName
+            }
+            fontHeight = excelStyle.fontHeight
+            bold = excelStyle.fontBold
+            italic = excelStyle.fontItalic
+            strikeout = excelStyle.fontStrikeout
+            underline = excelStyle.fontUnderline.toByte()
+        }
+
+        val cellStyle = workbook.createCellStyle().apply {
+            setFont(font)
+            shrinkToFit = excelStyle.shrinkToFit
+            fillPattern = excelStyle.fillPattern
+            fillForegroundColor = excelStyle.fillForegroundColor.index
+            fillBackgroundColor = excelStyle.fillBackgroundColor.index
+            alignment = excelStyle.alignment
+            verticalAlignment = excelStyle.verticalAlignment
+
+            borderTop = excelStyle.borderStyle
+            borderLeft = excelStyle.borderStyle
+            borderRight = excelStyle.borderStyle
+            borderBottom = excelStyle.borderStyle
+
+            topBorderColor = excelStyle.borderColor.index
+            leftBorderColor = excelStyle.borderColor.index
+            rightBorderColor = excelStyle.borderColor.index
+            bottomBorderColor = excelStyle.borderColor.index
+        }
+
+        styles[styleName] = cellStyle
     }
 
     protected fun setCellValue(cell: Cell, value: Any?) {
@@ -52,7 +109,17 @@ class SXSSExcelGenerator<T>(
             is LocalDate -> cell.setCellValue(value)
             is Date -> cell.setCellValue(value)
             is RichTextString -> cell.setCellValue(value)
-            else -> cell.setCellValue(value?.toString()?.ifBlank { "" } ?: "")
+            else -> {
+                val str = value?.toString()?.ifBlank { "" } ?: ""
+                cell.setCellValue(str)
+                @Suppress("HttpUrlsUsage")
+                if (str.startsWith("http://") || str.startsWith("https://")) {
+                    val hyperlink = workbook.creationHelper.createHyperlink(HyperlinkType.URL).apply {
+                        address = str
+                    }
+                    cell.hyperlink = hyperlink
+                }
+            }
         }
     }
 
@@ -60,7 +127,9 @@ class SXSSExcelGenerator<T>(
         items.forEach { item ->
             val row = sheet.createRow(currentRowIndex++)
             cellInfos.forEachIndexed { columnIndex, cellInfo ->
-                val cell = row.createCell(columnIndex)
+                val cell = row.createCell(columnIndex).apply {
+                    cellStyle = styles[cellInfo.styleName()] ?: styles[DEFAULT_BODY_STYLE]
+                }
                 val value = cellInfo.field.get(item)
                 setCellValue(cell, value)
             }

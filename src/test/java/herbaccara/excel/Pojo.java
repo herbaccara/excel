@@ -3,8 +3,22 @@ package herbaccara.excel;
 import herbaccara.excel.annotation.ExcelColumn;
 import herbaccara.excel.annotation.ExcelSheet;
 import herbaccara.excel.annotation.ExcelStyle;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 
-@ExcelSheet("pojos")
+@ExcelSheet(
+        value = "pojos",
+        headerStyle = @ExcelStyle(
+                fillPattern =  FillPatternType.SOLID_FOREGROUND,
+                fillForegroundColor = IndexedColors.GREEN,
+                borderStyle = BorderStyle.THIN,
+                fontBold = true
+        ),
+        bodyStyle = @ExcelStyle(
+                fontItalic = true
+        )
+)
 public class Pojo {
 
     public Pojo(final String foo, final String bar) {
@@ -12,11 +26,11 @@ public class Pojo {
         this.bar = bar;
     }
 
-    @ExcelColumn(name = "푸", order = 1)
-    @ExcelStyle
+    @ExcelColumn(value = "푸", order = 1)
+    @ExcelStyle(fontBold = true)
     private String foo;
 
-    @ExcelColumn(name = "바", order = 2)
+    @ExcelColumn(value = "바", order = 2)
     private String bar;
 
     public String getFoo() {

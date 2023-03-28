@@ -14,7 +14,8 @@ public class ExcelGeneratorJavaTest {
         SXSSExcelGenerator<Pojo> sxssExcelGenerator = new SXSSExcelGenerator<>(Pojo.class);
         sxssExcelGenerator.addRows(Arrays.asList(
                 new Pojo("가", "블라블라\b블~라~블~라~"),
-                new Pojo("다", null)
+                new Pojo("다", null),
+                new Pojo("바", "https://www.google.com")
         ));
         sxssExcelGenerator.write(Files.newOutputStream(new File("src/test/resources/test.xlsx").toPath()));
     }

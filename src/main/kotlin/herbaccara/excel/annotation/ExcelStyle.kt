@@ -1,16 +1,32 @@
 package herbaccara.excel.annotation
 
-import org.apache.poi.ss.usermodel.BorderStyle
-import org.apache.poi.ss.usermodel.HorizontalAlignment
-import org.apache.poi.ss.usermodel.IndexedColors
-import org.apache.poi.ss.usermodel.VerticalAlignment
+import herbaccara.excel.style.Underline
+import org.apache.poi.ss.usermodel.*
 
-@Target(AnnotationTarget.CLASS, AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FIELD)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
 annotation class ExcelStyle(
-    val backgroundColor: IndexedColors = IndexedColors.AUTOMATIC,
+    val fontName: String = "",
+    val fontHeight: Short = 220,
+    val fontBold: Boolean = false,
+    val fontItalic: Boolean = false,
+    val fontStrikeout: Boolean = false,
+    val fontUnderline: Underline = Underline.NONE,
+    val shrinkToFit: Boolean = false,
+    val fillPattern: FillPatternType = FillPatternType.NO_FILL,
+    val fillForegroundColor: IndexedColors = IndexedColors.AUTOMATIC, // 64
+    val fillBackgroundColor: IndexedColors = IndexedColors.AUTOMATIC, // 64
     val borderStyle: BorderStyle = BorderStyle.NONE,
-    val horizontalAlignment: HorizontalAlignment = HorizontalAlignment.CENTER,
-    val verticalAlignment: VerticalAlignment = VerticalAlignment.CENTER
-)
+    val borderColor: IndexedColors = IndexedColors.BLACK, // 8
+    val alignment: HorizontalAlignment = HorizontalAlignment.GENERAL,
+    val verticalAlignment: VerticalAlignment = VerticalAlignment.BOTTOM
+) {
+    companion object {
+        private val DefaultExcelStyle = ExcelStyle()
+
+        fun isDefault(style: ExcelStyle): Boolean {
+            return DefaultExcelStyle == style
+        }
+    }
+}
