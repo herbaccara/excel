@@ -30,17 +30,16 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
         ExcelType.SXSSF -> SXSSFWorkbook()
     }
 
+    protected val maxRows = workbook.spreadsheetVersion.maxRows
+
     protected abstract val styles: MutableMap<String, CellStyle>
 
-    protected fun createStyle(styleName: String, excelStyleClass: KClass<out ExcelCellStyle>) {
+    protected fun createStyle(excelStyleClass: KClass<out ExcelCellStyle>): CellStyle {
         val createInstance = excelStyleClass.createInstance()
-        val cellStyle = createInstance.apply(workbook)
-        styles[styleName] = cellStyle
+        return createInstance.apply(workbook)
     }
 
-    protected fun createStyle(styleName: String, excelStyle: ExcelStyle) {
-        if (ExcelStyle.isDefault(excelStyle)) return
-
+    protected fun createStyle(excelStyle: ExcelStyle): CellStyle {
         val font = workbook.createFont().apply {
             if (excelStyle.fontName.isNotBlank()) {
                 fontName = excelStyle.fontName
@@ -78,7 +77,7 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
             }
         }
 
-        styles[styleName] = cellStyle
+        return cellStyle
     }
 
     protected fun setCellValue(cell: Cell, value: Any?) {

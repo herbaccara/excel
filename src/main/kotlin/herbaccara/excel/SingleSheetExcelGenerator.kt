@@ -24,18 +24,19 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
         }
 
         // header style
-        if (excelSheet.headerStyleClass == DefaultExcelCellStyle::class) {
-            createStyle(DEFAULT_HEADER_STYLE, excelSheet.headerStyle)
+        styles[DEFAULT_HEADER_STYLE] = if (excelSheet.headerStyleClass == DefaultExcelCellStyle::class) {
+            createStyle(excelSheet.headerStyle)
         } else {
-            createStyle(DEFAULT_HEADER_STYLE, excelSheet.headerStyleClass)
+            createStyle(excelSheet.headerStyleClass)
         }
 
         // body style
-        if (excelSheet.bodyStyleClass == DefaultExcelCellStyle::class) {
-            createStyle(DEFAULT_BODY_STYLE, excelSheet.bodyStyle)
+        val bodyStyle = if (excelSheet.bodyStyleClass == DefaultExcelCellStyle::class) {
+            createStyle(excelSheet.bodyStyle)
         } else {
-            createStyle(DEFAULT_BODY_STYLE, excelSheet.bodyStyleClass)
+            createStyle(excelSheet.bodyStyleClass)
         }
+        styles[DEFAULT_BODY_STYLE] = bodyStyle
 
         cellInfos = clazz.declaredFields
             .mapNotNull { field ->
@@ -48,11 +49,22 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
                         val excelStyleClass = field.getAnnotation(ExcelStyleClass::class.java)
                         val excelStyle = field.getAnnotation(ExcelStyle::class.java)
 
-                        if (excelStyleClass != null) {
-                            createStyle(cellInfo.styleName(), excelStyleClass.value)
+                        val style = if (excelStyleClass != null) {
+                            createStyle(excelStyleClass.value)
                         } else if (excelStyle != null) {
-                            createStyle(cellInfo.styleName(), excelStyle)
+                            createStyle(excelStyle)
+                        } else {
+                            workbook.createCellStyle().apply {
+                                cloneStyleFrom(bodyStyle)
+                            }
                         }
+
+                        // 0 이면 한번도 설정을 안한 상태
+                        if (style.dataFormat == 0.toShort()) {
+                            val type = cellInfo.field.type
+                            // TODO : type 에 따른 dataFormat 처리
+                        }
+                        styles[cellInfo.styleName()] = style
                     }
                 } else {
                     null
@@ -84,7 +96,7 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
         cellInfos.forEachIndexed { index, cellInfo ->
             val cell = row.createCell(index)
 
-            cell.cellStyle = styles[cellInfo.styleName()] ?: styles[DEFAULT_BODY_STYLE]
+            cell.cellStyle = styles[cellInfo.styleName()]
             setCellValue(cell, cellInfo.field.get(item))
         }
     }
