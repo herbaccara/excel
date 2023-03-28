@@ -73,19 +73,19 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
         val row = sheet.createRow(currentRowIndex++)
         cellInfos.forEachIndexed { index, cellInfo ->
             val cell = row.createCell(index)
-            cell.setCellValue(cellInfo.excelColumn.value)
+
             cell.cellStyle = styles[DEFAULT_HEADER_STYLE]
+            cell.setCellValue(cellInfo.excelColumn.value)
         }
     }
 
     protected fun renderBody(item: T) {
         val row = sheet.createRow(currentRowIndex++)
         cellInfos.forEachIndexed { index, cellInfo ->
-            val cell = row.createCell(index).apply {
-                cellStyle = styles[cellInfo.styleName()] ?: styles[DEFAULT_BODY_STYLE]
-            }
-            val value = cellInfo.field.get(item)
-            setCellValue(cell, value)
+            val cell = row.createCell(index)
+
+            cell.cellStyle = styles[cellInfo.styleName()] ?: styles[DEFAULT_BODY_STYLE]
+            setCellValue(cell, cellInfo.field.get(item))
         }
     }
 
