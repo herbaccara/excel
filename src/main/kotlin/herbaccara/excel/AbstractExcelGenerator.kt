@@ -90,6 +90,7 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
             is Date -> cell.setCellValue(value)
             is Calendar -> cell.setCellValue(value)
             is RichTextString -> cell.setCellValue(value)
+            is Enum<*> -> cell.setCellValue(value.name)
             else -> {
                 val str = value?.toString()?.ifBlank { "" } ?: ""
                 cell.setCellValue(str)
