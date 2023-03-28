@@ -10,9 +10,9 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
     excelType: ExcelType = ExcelType.SXSSF
 ) : AbstractExcelGenerator<T>(excelType) {
 
-    private val sheet: Sheet
-    private var currentRowIndex: Int = 0
-    private val cellInfos: List<CellInfo>
+    protected val sheet: Sheet
+    protected var currentRowIndex: Int = 0
+    protected val cellInfos: List<CellInfo>
     override val styles: MutableMap<String, CellStyle> = mutableMapOf()
 
     init {
@@ -66,24 +66,30 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
                 }
             }
 
-        val headerRow = sheet.createRow(currentRowIndex++)
+        renderHeader()
+    }
+
+    protected fun renderHeader() {
+        val row = sheet.createRow(currentRowIndex++)
         cellInfos.forEachIndexed { index, cellInfo ->
-            val cell = headerRow.createCell(index)
+            val cell = row.createCell(index)
             cell.setCellValue(cellInfo.excelColumn.value)
             cell.cellStyle = styles[DEFAULT_HEADER_STYLE]
         }
     }
 
-    override fun addRows(items: List<T>) {
-        items.forEach { item ->
-            val row = sheet.createRow(currentRowIndex++)
-            cellInfos.forEachIndexed { columnIndex, cellInfo ->
-                val cell = row.createCell(columnIndex).apply {
-                    cellStyle = styles[cellInfo.styleName()] ?: styles[DEFAULT_BODY_STYLE]
-                }
-                val value = cellInfo.field.get(item)
-                setCellValue(cell, value)
+    protected fun renderBody(item: T) {
+        val row = sheet.createRow(currentRowIndex++)
+        cellInfos.forEachIndexed { columnIndex, cellInfo ->
+            val cell = row.createCell(columnIndex).apply {
+                cellStyle = styles[cellInfo.styleName()] ?: styles[DEFAULT_BODY_STYLE]
             }
+            val value = cellInfo.field.get(item)
+            setCellValue(cell, value)
         }
+    }
+
+    override fun addRows(items: List<T>) {
+        items.forEach(::renderBody)
     }
 }
