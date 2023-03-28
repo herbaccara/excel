@@ -80,8 +80,8 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
 
     protected fun renderBody(item: T) {
         val row = sheet.createRow(currentRowIndex++)
-        cellInfos.forEachIndexed { columnIndex, cellInfo ->
-            val cell = row.createCell(columnIndex).apply {
+        cellInfos.forEachIndexed { index, cellInfo ->
+            val cell = row.createCell(index).apply {
                 cellStyle = styles[cellInfo.styleName()] ?: styles[DEFAULT_BODY_STYLE]
             }
             val value = cellInfo.field.get(item)
