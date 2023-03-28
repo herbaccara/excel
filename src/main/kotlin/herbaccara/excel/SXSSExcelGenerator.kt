@@ -72,6 +72,7 @@ class SXSSExcelGenerator<T>(
                 fontName = excelStyle.fontName
             }
             fontHeight = excelStyle.fontHeight
+            color = excelStyle.fontColor.index
             bold = excelStyle.fontBold
             italic = excelStyle.fontItalic
             strikeout = excelStyle.fontStrikeout

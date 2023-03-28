@@ -1,6 +1,5 @@
 package herbaccara.excel.annotation
 
-import herbaccara.excel.style.Underline
 import org.apache.poi.ss.usermodel.*
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FIELD)
@@ -8,6 +7,7 @@ import org.apache.poi.ss.usermodel.*
 @MustBeDocumented
 annotation class ExcelStyle(
     val fontName: String = "",
+    val fontColor: IndexedColors = IndexedColors.BLACK, // 8
     val fontHeight: Short = 220,
     val fontBold: Boolean = false,
     val fontItalic: Boolean = false,
