@@ -88,6 +88,7 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
             is LocalDateTime -> cell.setCellValue(value)
             is LocalDate -> cell.setCellValue(value)
             is Date -> cell.setCellValue(value)
+            is Calendar -> cell.setCellValue(value)
             is RichTextString -> cell.setCellValue(value)
             else -> {
                 val str = value?.toString()?.ifBlank { "" } ?: ""
