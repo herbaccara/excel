@@ -1,13 +1,12 @@
 package herbaccara.excel
 
-import herbaccara.excel.annotation.ExcelStyle
+import herbaccara.excel.annotation.*
+import herbaccara.excel.dataformat.DataFormatStrategy
+import herbaccara.excel.style.DefaultExcelCellStyle
 import herbaccara.excel.style.ExcelCellStyle
 import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.CellStyle
-import org.apache.poi.ss.usermodel.RichTextString
-import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.OutputStream
@@ -17,7 +16,11 @@ import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<T> {
+abstract class AbstractExcelGenerator<T>(
+    clazz: Class<T>,
+    excelType: ExcelType,
+    dataFormatStrategy: DataFormatStrategy
+) : ExcelGenerator<T> {
 
     companion object {
         internal val DEFAULT_HEADER_STYLE = "${this::class.java.name}.DEFAULT_HEADER_STYLE"
@@ -31,16 +34,119 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
     }
 
     protected val maxRows = workbook.spreadsheetVersion.maxRows
+    protected val columnWidth: Int
+    protected val rowHeight: Short
 
-    protected abstract val styles: MutableMap<String, CellStyle>
+    protected val styles: MutableMap<String, CellStyle> = mutableMapOf()
 
-    protected fun createStyle(excelStyleClass: KClass<out ExcelCellStyle>): CellStyle {
+    protected val cellInfos: List<CellInfo>
+
+    init {
+        val excelSheet = requireNotNull(clazz.getAnnotation(ExcelSheet::class.java))
+        columnWidth = excelSheet.columnWidth
+        rowHeight = excelSheet.rowHeight
+
+        styles[DEFAULT_HEADER_STYLE] = if (excelSheet.headerStyleClass == DefaultExcelCellStyle::class) {
+            createCellStyle(excelSheet.headerStyle)
+        } else {
+            createCellStyle(excelSheet.headerStyleClass)
+        }
+
+        styles[DEFAULT_BODY_STYLE] = if (excelSheet.bodyStyleClass == DefaultExcelCellStyle::class) {
+            createCellStyle(excelSheet.bodyStyle)
+        } else {
+            createCellStyle(excelSheet.bodyStyleClass)
+        }
+
+        cellInfos = clazz.declaredFields
+            .mapNotNull { field ->
+                val excelColumn = field.getAnnotation(ExcelColumn::class.java)
+                if (excelColumn != null) {
+                    CellInfo(
+                        field.apply { isAccessible = true },
+                        ExcelColumn(excelColumn.value.ifBlank { field.name }, excelColumn.order)
+                    ).also { cellInfo ->
+                        val excelStyleClass = field.getAnnotation(ExcelStyleClass::class.java)
+                        val excelStyle = field.getAnnotation(ExcelStyle::class.java)
+
+                        val style = if (excelStyleClass != null) {
+                            createCellStyle(excelStyleClass.value)
+                        } else if (excelStyle != null) {
+                            createCellStyle(excelStyle)
+                        } else {
+                            workbook.createCellStyle().apply {
+                                cloneStyleFrom(styles[DEFAULT_BODY_STYLE])
+                            }
+                        }
+
+                        // 0 이면 한번도 설정을 안한 상태
+                        if (style.dataFormat == 0.toShort()) {
+                            val type = cellInfo.field.type
+                            val dataFormat = dataFormatStrategy.apply(workbook.createDataFormat(), type)
+                            style.dataFormat = dataFormat
+                        }
+                        styles[cellInfo.styleName()] = style
+                    }
+                } else {
+                    null
+                }
+            }
+            .let { items ->
+                when (excelSheet.fieldSort) {
+                    Sort.NONE -> items
+                    Sort.NAME -> items.sortedBy { it.excelColumn.value }
+                    Sort.ORDER -> items.sortedBy { it.excelColumn.order }
+                }
+            }
+    }
+
+    protected fun createSheet(name: String): Sheet {
+        return workbook.createSheet(name).apply {
+            defaultColumnWidth = columnWidth
+            defaultRowHeight = rowHeight
+        }
+    }
+
+    // data format
+
+    protected fun createDataFormat(): DataFormat = workbook.createDataFormat()
+
+    protected fun createDataFormat(format: String): Short = workbook.createDataFormat().getFormat(format)
+
+    // hyper link
+
+    private val hyperlinkPatterns = listOf("http://", "https://", "mailto:")
+
+    protected fun createHyperlink(type: HyperlinkType): Hyperlink = workbook.creationHelper.createHyperlink(type)
+
+    protected fun createHyperlink(value: String): Hyperlink {
+        @Suppress("HttpUrlsUsage")
+        val type = when {
+            value.startsWith("http://") || value.startsWith("https://") -> HyperlinkType.URL
+            value.startsWith("mailto:") -> HyperlinkType.EMAIL
+            else -> HyperlinkType.NONE
+        }
+
+        return createHyperlink(type).apply {
+            address = value
+        }
+    }
+
+    // font
+
+    protected fun createFont(): Font = workbook.createFont()
+
+    // cell style
+
+    protected fun createCellStyle(): CellStyle = workbook.createCellStyle()
+
+    protected fun createCellStyle(excelStyleClass: KClass<out ExcelCellStyle>): CellStyle {
         val createInstance = excelStyleClass.createInstance()
         return createInstance.apply(workbook)
     }
 
-    protected fun createStyle(excelStyle: ExcelStyle): CellStyle {
-        val font = workbook.createFont().apply {
+    protected fun createCellStyle(excelStyle: ExcelStyle): CellStyle {
+        val font = createFont().apply {
             if (excelStyle.fontName.isNotBlank()) {
                 fontName = excelStyle.fontName
             }
@@ -52,7 +158,7 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
             underline = excelStyle.fontUnderline.toByte()
         }
 
-        val cellStyle = workbook.createCellStyle().apply {
+        val cellStyle = createCellStyle().apply {
             setFont(font)
             shrinkToFit = excelStyle.shrinkToFit
             fillPattern = excelStyle.fillPattern
@@ -72,8 +178,7 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
             bottomBorderColor = excelStyle.borderColor.index
 
             if (excelStyle.dataFormat.isNotBlank()) {
-                val dataFormat = workbook.createDataFormat()
-                this.dataFormat = dataFormat.getFormat(excelStyle.dataFormat)
+                dataFormat = createDataFormat(excelStyle.dataFormat)
             }
         }
 
@@ -93,12 +198,8 @@ abstract class AbstractExcelGenerator<T>(excelType: ExcelType) : ExcelGenerator<
             else -> {
                 val str = value?.toString()?.ifBlank { "" } ?: ""
                 cell.setCellValue(str)
-                @Suppress("HttpUrlsUsage")
-                if (str.startsWith("http://") || str.startsWith("https://")) {
-                    val hyperlink = workbook.creationHelper.createHyperlink(HyperlinkType.URL).apply {
-                        address = str
-                    }
-                    cell.hyperlink = hyperlink
+                if (hyperlinkPatterns.any { str.startsWith(it) }) {
+                    cell.hyperlink = createHyperlink(str)
                 }
             }
         }

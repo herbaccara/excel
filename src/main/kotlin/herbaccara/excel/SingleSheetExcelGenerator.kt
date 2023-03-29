@@ -1,87 +1,22 @@
 package herbaccara.excel
 
-import herbaccara.excel.annotation.*
+import herbaccara.excel.annotation.ExcelSheet
 import herbaccara.excel.dataformat.DataFormatStrategy
 import herbaccara.excel.dataformat.DefaultDataFormatStrategy
-import herbaccara.excel.style.DefaultExcelCellStyle
-import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.Sheet
 
 class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
     clazz: Class<T>,
     excelType: ExcelType = ExcelType.SXSSF,
     dataFormatStrategy: DataFormatStrategy = DefaultDataFormatStrategy()
-) : AbstractExcelGenerator<T>(excelType) {
+) : AbstractExcelGenerator<T>(clazz, excelType, dataFormatStrategy) {
 
     protected val sheet: Sheet
     protected var currentRowIndex: Int = 0
-    protected val cellInfos: List<CellInfo>
-    override val styles: MutableMap<String, CellStyle> = mutableMapOf()
 
     init {
-        val excelSheet = clazz.getAnnotation(ExcelSheet::class.java) ?: throw IllegalArgumentException("")
-
-        sheet = workbook.createSheet(excelSheet.value).apply {
-            defaultColumnWidth = excelSheet.columnWidth
-            defaultRowHeight = excelSheet.rowHeight
-        }
-
-        // header style
-        styles[DEFAULT_HEADER_STYLE] = if (excelSheet.headerStyleClass == DefaultExcelCellStyle::class) {
-            createStyle(excelSheet.headerStyle)
-        } else {
-            createStyle(excelSheet.headerStyleClass)
-        }
-
-        // body style
-        val bodyStyle = if (excelSheet.bodyStyleClass == DefaultExcelCellStyle::class) {
-            createStyle(excelSheet.bodyStyle)
-        } else {
-            createStyle(excelSheet.bodyStyleClass)
-        }
-        styles[DEFAULT_BODY_STYLE] = bodyStyle
-
-        cellInfos = clazz.declaredFields
-            .mapNotNull { field ->
-                val excelColumn = field.getAnnotation(ExcelColumn::class.java)
-                if (excelColumn != null) {
-                    CellInfo(
-                        field.apply { isAccessible = true },
-                        ExcelColumn(excelColumn.value.ifBlank { field.name }, excelColumn.order)
-                    ).also { cellInfo ->
-                        val excelStyleClass = field.getAnnotation(ExcelStyleClass::class.java)
-                        val excelStyle = field.getAnnotation(ExcelStyle::class.java)
-
-                        val style = if (excelStyleClass != null) {
-                            createStyle(excelStyleClass.value)
-                        } else if (excelStyle != null) {
-                            createStyle(excelStyle)
-                        } else {
-                            workbook.createCellStyle().apply {
-                                cloneStyleFrom(bodyStyle)
-                            }
-                        }
-
-                        // 0 이면 한번도 설정을 안한 상태
-                        if (style.dataFormat == 0.toShort()) {
-                            val type = cellInfo.field.type
-                            val dataFormat = dataFormatStrategy.apply(workbook.createDataFormat(), type)
-                            style.dataFormat = dataFormat
-                        }
-                        styles[cellInfo.styleName()] = style
-                    }
-                } else {
-                    null
-                }
-            }
-            .let { items ->
-                when (excelSheet.fieldSort) {
-                    Sort.NONE -> items
-                    Sort.NAME -> items.sortedBy { it.excelColumn.value }
-                    Sort.ORDER -> items.sortedBy { it.excelColumn.order }
-                }
-            }
-
+        val excelSheet = clazz.getAnnotation(ExcelSheet::class.java)!!
+        sheet = createSheet(excelSheet.value)
         renderHeader()
     }
 
