@@ -15,14 +15,9 @@ class MultipleSheetExcelGenerator<T> @JvmOverloads constructor(
     protected lateinit var currentSheet: Sheet
     protected var currentRowIndex: Int = 0
     protected var rownum = 0
-    protected val chunk: Int
+    protected val chunk: Int = if (chunk == null || chunk > maxRows) maxRows else chunk
 
     init {
-        if (chunk == null || chunk > maxRows) {
-            this.chunk = maxRows
-        } else {
-            this.chunk = chunk
-        }
         createSheetWithHeader()
     }
 
