@@ -1,6 +1,5 @@
 package herbaccara.excel
 
-import herbaccara.excel.annotation.ExcelSheet
 import herbaccara.excel.dataformat.DataFormatStrategy
 import herbaccara.excel.dataformat.DefaultDataFormatStrategy
 import org.apache.poi.ss.usermodel.Sheet
@@ -15,8 +14,7 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
     protected var currentRowIndex: Int = 0
 
     init {
-        val excelSheet = clazz.getAnnotation(ExcelSheet::class.java)!!
-        sheet = createSheet(excelSheet.value)
+        sheet = createSheet()
         renderHeader()
     }
 

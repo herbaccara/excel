@@ -34,6 +34,7 @@ abstract class AbstractExcelGenerator<T>(
     }
 
     protected val maxRows = workbook.spreadsheetVersion.maxRows
+    protected val defaultSheetName: String
     protected val defaultColumnWidth: Int
     protected val defaultRowHeight: Short
 
@@ -43,6 +44,7 @@ abstract class AbstractExcelGenerator<T>(
 
     init {
         val excelSheet = requireNotNull(clazz.getAnnotation(ExcelSheet::class.java))
+        defaultSheetName = excelSheet.value.ifBlank { "Sheet" }
         defaultColumnWidth = excelSheet.columnWidth
         defaultRowHeight = excelSheet.rowHeight
 
@@ -98,8 +100,8 @@ abstract class AbstractExcelGenerator<T>(
             }
     }
 
-    protected fun createSheet(name: String): Sheet {
-        return workbook.createSheet(name).also {
+    protected fun createSheet(suffix: String = ""): Sheet {
+        return workbook.createSheet("$defaultSheetName$suffix").also {
             it.defaultColumnWidth = defaultColumnWidth
             it.defaultRowHeight = defaultRowHeight
         }
