@@ -1,13 +1,16 @@
 package herbaccara.excel
 
 import herbaccara.excel.annotation.*
+import herbaccara.excel.dataformat.DataFormatStrategy
+import herbaccara.excel.dataformat.DefaultDataFormatStrategy
 import herbaccara.excel.style.DefaultExcelCellStyle
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.Sheet
 
 class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
     clazz: Class<T>,
-    excelType: ExcelType = ExcelType.SXSSF
+    excelType: ExcelType = ExcelType.SXSSF,
+    private val dataFormatStrategy: DataFormatStrategy = DefaultDataFormatStrategy()
 ) : AbstractExcelGenerator<T>(excelType) {
 
     protected val sheet: Sheet
@@ -61,15 +64,9 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
 
                         // 0 이면 한번도 설정을 안한 상태
                         if (style.dataFormat == 0.toShort()) {
-                            val type = cellInfo.field.type.kotlin
-
-                            val integerTypes = listOf(Byte::class, Short::class, Int::class, Long::class)
-                            val realTypes = listOf(Float::class, Double::class)
-
-                            val isIntegerType = integerTypes.contains(type) // #,##0
-                            val isRealType = realTypes.contains(type) // #,##0.00
-
-                            // TODO : type 에 따른 dataFormat 처리
+                            val type = cellInfo.field.type
+                            val dataFormat = dataFormatStrategy.apply(workbook.createDataFormat(), type)
+                            style.dataFormat = dataFormat
                         }
                         styles[cellInfo.styleName()] = style
                     }

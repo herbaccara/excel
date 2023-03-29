@@ -8,6 +8,8 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
+import java.util.Random;
+
 @ExcelSheet(
         value = "pojos",
         headerStyle = @ExcelStyle(
@@ -25,12 +27,6 @@ public class Pojo {
         this.bar = bar;
     }
 
-    public Pojo(final String foo, final String bar, final Integer cost) {
-        this.foo = foo;
-        this.bar = bar;
-        this.cost = cost;
-    }
-
     @ExcelColumn(value = "a푸")
     @ExcelStyle(fontBold = true)
     private String foo;
@@ -40,10 +36,21 @@ public class Pojo {
 
     @ExcelColumn("비용")
 //    @ExcelStyleClass(CostCellStyle.class)
-    private Integer cost;
+    private Integer cost = new Random().nextInt(1_000_000);
 
     @ExcelColumn("비용xxxxxxx")
-    private float asdasd = 0.1f;
+    private float asdasd = new Random().nextFloat(1_000_000);
+
+    @ExcelColumn("long~~~~")
+    private Long longggg = new Random().nextLong(1_000_000);
+
+    public Long getLongggg() {
+        return longggg;
+    }
+
+    public void setLongggg(final Long longggg) {
+        this.longggg = longggg;
+    }
 
     public float getAsdasd() {
         return asdasd;
