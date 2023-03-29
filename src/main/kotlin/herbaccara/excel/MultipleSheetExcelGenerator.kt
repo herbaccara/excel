@@ -7,8 +7,8 @@ import org.apache.poi.ss.usermodel.Sheet
 class MultipleSheetExcelGenerator<T> @JvmOverloads constructor(
     clazz: Class<T>,
     chunk: Int? = null,
-    excelType: ExcelType = ExcelType.SXSSF,
-    dataFormatStrategy: DataFormatStrategy = DefaultDataFormatStrategy()
+    dataFormatStrategy: DataFormatStrategy = DefaultDataFormatStrategy(),
+    excelType: ExcelType = ExcelType.SXSSF
 ) : AbstractExcelGenerator<T>(clazz, excelType, dataFormatStrategy) {
 
     protected val sheets: MutableList<Sheet> = mutableListOf()

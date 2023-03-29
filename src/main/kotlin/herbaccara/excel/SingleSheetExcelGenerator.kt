@@ -6,8 +6,8 @@ import org.apache.poi.ss.usermodel.Sheet
 
 class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
     clazz: Class<T>,
-    excelType: ExcelType = ExcelType.SXSSF,
-    dataFormatStrategy: DataFormatStrategy = DefaultDataFormatStrategy()
+    dataFormatStrategy: DataFormatStrategy = DefaultDataFormatStrategy(),
+    excelType: ExcelType = ExcelType.SXSSF
 ) : AbstractExcelGenerator<T>(clazz, excelType, dataFormatStrategy) {
 
     protected val sheet: Sheet
