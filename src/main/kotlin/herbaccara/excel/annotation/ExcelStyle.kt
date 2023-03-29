@@ -21,7 +21,10 @@ annotation class ExcelStyle(
     val borderColor: IndexedColors = IndexedColors.BLACK, // 8
     val alignment: HorizontalAlignment = HorizontalAlignment.GENERAL,
     val verticalAlignment: VerticalAlignment = VerticalAlignment.BOTTOM,
-    val dataFormat: String = ""
+    val dataFormat: String = "",
+    val wrapText: Boolean = false,
+    val quotePrefixed: Boolean = false,
+    val rotation: Short = 0
 ) {
     companion object {
         private val DefaultExcelStyle = ExcelStyle()

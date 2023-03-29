@@ -162,10 +162,11 @@ abstract class AbstractExcelGenerator<T>(
 
         val cellStyle = createCellStyle().apply {
             setFont(font)
-            shrinkToFit = excelStyle.shrinkToFit
+
             fillPattern = excelStyle.fillPattern
             fillForegroundColor = excelStyle.fillForegroundColor.index
             fillBackgroundColor = excelStyle.fillBackgroundColor.index
+
             alignment = excelStyle.alignment
             verticalAlignment = excelStyle.verticalAlignment
 
@@ -178,6 +179,11 @@ abstract class AbstractExcelGenerator<T>(
             leftBorderColor = excelStyle.borderColor.index
             rightBorderColor = excelStyle.borderColor.index
             bottomBorderColor = excelStyle.borderColor.index
+
+            shrinkToFit = excelStyle.shrinkToFit
+            wrapText = excelStyle.wrapText
+            quotePrefixed = excelStyle.quotePrefixed
+            rotation = excelStyle.rotation
 
             if (excelStyle.dataFormat.isNotBlank()) {
                 dataFormat = createDataFormat(excelStyle.dataFormat)
