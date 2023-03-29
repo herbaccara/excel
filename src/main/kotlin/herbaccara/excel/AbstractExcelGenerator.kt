@@ -34,8 +34,8 @@ abstract class AbstractExcelGenerator<T>(
     }
 
     protected val maxRows = workbook.spreadsheetVersion.maxRows
-    protected val columnWidth: Int
-    protected val rowHeight: Short
+    protected val defaultColumnWidth: Int
+    protected val defaultRowHeight: Short
 
     protected val styles: MutableMap<String, CellStyle> = mutableMapOf()
 
@@ -43,8 +43,8 @@ abstract class AbstractExcelGenerator<T>(
 
     init {
         val excelSheet = requireNotNull(clazz.getAnnotation(ExcelSheet::class.java))
-        columnWidth = excelSheet.columnWidth
-        rowHeight = excelSheet.rowHeight
+        defaultColumnWidth = excelSheet.columnWidth
+        defaultRowHeight = excelSheet.rowHeight
 
         styles[DEFAULT_HEADER_STYLE] = if (excelSheet.headerStyleClass == DefaultExcelCellStyle::class) {
             createCellStyle(excelSheet.headerStyle)
@@ -74,7 +74,7 @@ abstract class AbstractExcelGenerator<T>(
                         } else if (excelStyle != null) {
                             createCellStyle(excelStyle)
                         } else {
-                            workbook.createCellStyle().apply {
+                            createCellStyle().apply {
                                 cloneStyleFrom(styles[DEFAULT_BODY_STYLE])
                             }
                         }
@@ -82,7 +82,7 @@ abstract class AbstractExcelGenerator<T>(
                         // 0 이면 한번도 설정을 안한 상태
                         if (style.dataFormat == 0.toShort()) {
                             val type = cellInfo.field.type
-                            val dataFormat = dataFormatStrategy.apply(workbook.createDataFormat(), type)
+                            val dataFormat = dataFormatStrategy.apply(createDataFormat(), type)
                             style.dataFormat = dataFormat
                         }
                         styles[cellInfo.styleName()] = style
@@ -101,9 +101,9 @@ abstract class AbstractExcelGenerator<T>(
     }
 
     protected fun createSheet(name: String): Sheet {
-        return workbook.createSheet(name).apply {
-            defaultColumnWidth = columnWidth
-            defaultRowHeight = rowHeight
+        return workbook.createSheet(name).also {
+            it.defaultColumnWidth = defaultColumnWidth
+            it.defaultRowHeight = defaultRowHeight
         }
     }
 
@@ -141,8 +141,8 @@ abstract class AbstractExcelGenerator<T>(
     protected fun createCellStyle(): CellStyle = workbook.createCellStyle()
 
     protected fun createCellStyle(excelStyleClass: KClass<out ExcelCellStyle>): CellStyle {
-        val createInstance = excelStyleClass.createInstance()
-        return createInstance.apply(workbook)
+        val excelCellStyle = excelStyleClass.createInstance()
+        return excelCellStyle.apply(workbook)
     }
 
     protected fun createCellStyle(excelStyle: ExcelStyle): CellStyle {
