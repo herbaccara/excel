@@ -19,23 +19,11 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
     }
 
     protected fun renderHeader() {
-        val row = sheet.createRow(currentRowIndex++)
-        cellInfos.forEachIndexed { index, cellInfo ->
-            val cell = row.createCell(index)
-
-            cell.cellStyle = headerCellStyle()
-            cell.setCellValue(cellInfo.excelColumn.value)
-        }
+        renderHeader(sheet, currentRowIndex++)
     }
 
     protected fun renderBody(item: T) {
-        val row = sheet.createRow(currentRowIndex++)
-        cellInfos.forEachIndexed { index, cellInfo ->
-            val cell = row.createCell(index)
-
-            cell.cellStyle = styles[cellInfo.styleName()]
-            setCellValue(cell, cellInfo.field.get(item))
-        }
+        renderBody(item, sheet, currentRowIndex++)
     }
 
     override fun addRows(items: List<T>) {

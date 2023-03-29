@@ -215,6 +215,26 @@ abstract class AbstractExcelGenerator<T>(
         }
     }
 
+    protected fun renderHeader(sheet: Sheet, rownum: Int) {
+        val row = sheet.createRow(rownum)
+        cellInfos.forEachIndexed { index, cellInfo ->
+            val cell = row.createCell(index)
+
+            cell.cellStyle = headerCellStyle()
+            cell.setCellValue(cellInfo.excelColumn.value)
+        }
+    }
+
+    protected fun renderBody(item: T, sheet: Sheet, rownum: Int) {
+        val row = sheet.createRow(rownum)
+        cellInfos.forEachIndexed { index, cellInfo ->
+            val cell = row.createCell(index)
+
+            cell.cellStyle = styles[cellInfo.styleName()]
+            setCellValue(cell, cellInfo.field.get(item))
+        }
+    }
+
     override fun write(os: OutputStream) {
         os.use {
             workbook.write(it)
