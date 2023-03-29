@@ -2,16 +2,12 @@ package herbaccara.excel
 
 import herbaccara.excel.dataformat.DataFormatStrategy
 import herbaccara.excel.dataformat.DefaultDataFormatStrategy
-import org.apache.poi.ss.SpreadsheetVersion
 import org.apache.poi.ss.usermodel.Sheet
 
 class MultipleSheetExcelGenerator<T> @JvmOverloads constructor(
     clazz: Class<T>,
+    chunk: Int? = null,
     excelType: ExcelType = ExcelType.SXSSF,
-    protected val chunk: Int = when (excelType) {
-        ExcelType.HSSF -> SpreadsheetVersion.EXCEL97.maxRows // 65,536
-        ExcelType.XSSF, ExcelType.SXSSF -> SpreadsheetVersion.EXCEL2007.maxRows // 1,048,576
-    },
     dataFormatStrategy: DataFormatStrategy = DefaultDataFormatStrategy()
 ) : AbstractExcelGenerator<T>(clazz, excelType, dataFormatStrategy) {
 
@@ -19,9 +15,14 @@ class MultipleSheetExcelGenerator<T> @JvmOverloads constructor(
     protected lateinit var currentSheet: Sheet
     protected var currentRowIndex: Int = 0
     protected var rownum = 0
+    protected val chunk: Int
 
     init {
-        if (chunk > maxRows) throw IllegalArgumentException()
+        if (chunk == null || chunk > maxRows) {
+            this.chunk = maxRows
+        } else {
+            this.chunk = chunk
+        }
         createSheetWithHeader()
     }
 
