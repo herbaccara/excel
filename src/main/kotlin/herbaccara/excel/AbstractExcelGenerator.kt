@@ -23,8 +23,8 @@ abstract class AbstractExcelGenerator<T>(
 ) : ExcelGenerator<T> {
 
     companion object {
-        internal val DEFAULT_HEADER_STYLE = "${this::class.java.name}.DEFAULT_HEADER_STYLE"
-        internal val DEFAULT_BODY_STYLE = "${this::class.java.name}.DEFAULT_BODY_STYLE"
+        private val DEFAULT_HEADER_STYLE = "${this::class.java.name}.DEFAULT_HEADER_STYLE"
+        private val DEFAULT_BODY_STYLE = "${this::class.java.name}.DEFAULT_BODY_STYLE"
     }
 
     protected val workbook: Workbook = when (excelType) {
@@ -74,9 +74,7 @@ abstract class AbstractExcelGenerator<T>(
                         } else if (excelStyle != null) {
                             createCellStyle(excelStyle)
                         } else {
-                            createCellStyle().apply {
-                                cloneStyleFrom(styles[DEFAULT_BODY_STYLE])
-                            }
+                            createCellStyle().apply { cloneStyleFrom(bodyCellStyle()) }
                         }
 
                         // 0 이면 한번도 설정을 안한 상태
@@ -137,6 +135,10 @@ abstract class AbstractExcelGenerator<T>(
     protected fun createFont(): Font = workbook.createFont()
 
     // cell style
+
+    protected fun headerCellStyle(): CellStyle = styles[DEFAULT_HEADER_STYLE]!!
+
+    protected fun bodyCellStyle(): CellStyle = styles[DEFAULT_BODY_STYLE]!!
 
     protected fun createCellStyle(): CellStyle = workbook.createCellStyle()
 

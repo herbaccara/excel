@@ -25,7 +25,7 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
         cellInfos.forEachIndexed { index, cellInfo ->
             val cell = row.createCell(index)
 
-            cell.cellStyle = styles[DEFAULT_HEADER_STYLE]
+            cell.cellStyle = headerCellStyle()
             cell.setCellValue(cellInfo.excelColumn.value)
         }
     }
