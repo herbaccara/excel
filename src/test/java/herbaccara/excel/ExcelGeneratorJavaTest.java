@@ -24,7 +24,7 @@ public class ExcelGeneratorJavaTest {
 
     @Test
     public void single() throws IOException {
-        final ExcelGenerator<Pojo> excelGenerator = new SingleSheetExcelGenerator(Pojo.class);
+        final ExcelGenerator<Pojo> excelGenerator = new SingleSheetExcelGenerator<>(Pojo.class);
         excelGenerator.addRows(Arrays.asList(
                 new Pojo("가", "블라블라\b블~라~블~라~"),
                 new Pojo("나", null),

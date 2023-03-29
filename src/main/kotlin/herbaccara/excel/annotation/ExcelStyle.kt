@@ -25,12 +25,4 @@ annotation class ExcelStyle(
     val wrapText: Boolean = false,
     val quotePrefixed: Boolean = false,
     val rotation: Short = 0
-) {
-    companion object {
-        private val DefaultExcelStyle = ExcelStyle()
-
-        fun isDefault(style: ExcelStyle): Boolean {
-            return DefaultExcelStyle == style
-        }
-    }
-}
+)
