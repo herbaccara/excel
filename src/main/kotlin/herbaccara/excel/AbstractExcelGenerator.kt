@@ -253,7 +253,7 @@ abstract class AbstractExcelGenerator<T>(
         }
     }
 
-    protected fun autoSizeColumn(sheet: Sheet) {
+    protected fun autoSizeColumns(sheet: Sheet) {
         for ((index, cellInfo) in cellInfos.withIndex()) {
             if (cellInfo.autoSize) {
                 if (sheet is SXSSFSheet) {

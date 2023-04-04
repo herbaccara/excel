@@ -32,7 +32,7 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
     }
 
     override fun write(os: OutputStream) {
-        autoSizeColumn(sheet)
+        autoSizeColumns(sheet)
         super.write(os)
     }
 }

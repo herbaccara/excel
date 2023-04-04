@@ -41,7 +41,7 @@ class MultipleSheetExcelGenerator<T> @JvmOverloads constructor(
     override fun addRows(items: List<T>) {
         items.forEach { item ->
             if (rownum > 0 && rownum % chunk == 0) {
-                autoSizeColumn(currentSheet)
+                autoSizeColumns(currentSheet)
                 createSheetWithHeader()
             }
             renderBody(item)
@@ -50,7 +50,7 @@ class MultipleSheetExcelGenerator<T> @JvmOverloads constructor(
     }
 
     override fun write(os: OutputStream) {
-        autoSizeColumn(currentSheet)
+        autoSizeColumns(currentSheet)
         super.write(os)
     }
 }
