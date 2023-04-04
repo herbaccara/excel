@@ -6,7 +6,8 @@ data class CellInfo(
     val field: Field,
     private val name: String,
     val order: Int,
-    val width: Int
+    val width: Int,
+    val autoSize: Boolean
 ) {
     fun name(): String {
         return name.ifBlank { field.name }

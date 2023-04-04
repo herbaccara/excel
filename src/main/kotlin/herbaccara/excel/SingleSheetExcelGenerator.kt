@@ -3,6 +3,7 @@ package herbaccara.excel
 import herbaccara.excel.dataformat.DataFormatStrategy
 import herbaccara.excel.dataformat.DefaultDataFormatStrategy
 import org.apache.poi.ss.usermodel.Sheet
+import java.io.OutputStream
 
 class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
     clazz: Class<T>,
@@ -28,5 +29,10 @@ class SingleSheetExcelGenerator<T> @JvmOverloads constructor(
 
     override fun addRows(items: List<T>) {
         items.forEach(::renderBody)
+    }
+
+    override fun write(os: OutputStream) {
+        autoSizeColumn(sheet)
+        super.write(os)
     }
 }

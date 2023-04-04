@@ -3,6 +3,7 @@ package herbaccara.excel
 import herbaccara.excel.dataformat.DataFormatStrategy
 import herbaccara.excel.dataformat.DefaultDataFormatStrategy
 import org.apache.poi.ss.usermodel.Sheet
+import java.io.OutputStream
 
 class MultipleSheetExcelGenerator<T> @JvmOverloads constructor(
     clazz: Class<T>,
@@ -40,10 +41,16 @@ class MultipleSheetExcelGenerator<T> @JvmOverloads constructor(
     override fun addRows(items: List<T>) {
         items.forEach { item ->
             if (rownum > 0 && rownum % chunk == 0) {
+                autoSizeColumn(currentSheet)
                 createSheetWithHeader()
             }
             renderBody(item)
             rownum++
         }
+    }
+
+    override fun write(os: OutputStream) {
+        autoSizeColumn(currentSheet)
+        super.write(os)
     }
 }

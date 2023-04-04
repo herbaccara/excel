@@ -6,5 +6,6 @@ package herbaccara.excel.annotation
 annotation class ExcelColumn(
     val value: String = "",
     val order: Int = 0,
-    val width: Int = 2048
+    val width: Int = 2048,
+    val autoSize: Boolean = false
 )

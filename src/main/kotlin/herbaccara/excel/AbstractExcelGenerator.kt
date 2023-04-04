@@ -7,6 +7,7 @@ import herbaccara.excel.style.ExcelCellStyle
 import org.apache.poi.common.usermodel.HyperlinkType
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.*
+import org.apache.poi.xssf.streaming.SXSSFSheet
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.OutputStream
@@ -71,7 +72,8 @@ abstract class AbstractExcelGenerator<T>(
                         field.apply { isAccessible = true },
                         excelColumn.value,
                         excelColumn.order,
-                        excelColumn.width
+                        excelColumn.width,
+                        excelColumn.autoSize
                     ).also { cellInfo ->
                         val excelStyleClass = field.getAnnotation(ExcelStyleClass::class.java)
                         val excelStyle = field.getAnnotation(ExcelStyle::class.java)
@@ -248,6 +250,17 @@ abstract class AbstractExcelGenerator<T>(
 
             cell.cellStyle = styles[cellInfo.styleName()]
             setCellValue(cell, cellInfo.field.get(item))
+        }
+    }
+
+    protected fun autoSizeColumn(sheet: Sheet) {
+        for ((index, cellInfo) in cellInfos.withIndex()) {
+            if (cellInfo.autoSize) {
+                if (sheet is SXSSFSheet) {
+                    sheet.trackColumnForAutoSizing(index)
+                }
+                sheet.autoSizeColumn(index)
+            }
         }
     }
 
