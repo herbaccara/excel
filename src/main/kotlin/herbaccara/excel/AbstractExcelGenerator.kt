@@ -69,7 +69,9 @@ abstract class AbstractExcelGenerator<T>(
                 if (excelColumn != null) {
                     CellInfo(
                         field.apply { isAccessible = true },
-                        ExcelColumn(excelColumn.value.ifBlank { field.name }, excelColumn.order)
+                        excelColumn.value,
+                        excelColumn.order,
+                        excelColumn.width
                     ).also { cellInfo ->
                         val excelStyleClass = field.getAnnotation(ExcelStyleClass::class.java)
                         val excelStyle = field.getAnnotation(ExcelStyle::class.java)
@@ -97,8 +99,8 @@ abstract class AbstractExcelGenerator<T>(
             .let { items ->
                 when (excelSheet.fieldSort) {
                     Sort.NONE -> items
-                    Sort.NAME -> items.sortedBy { it.excelColumn.value }
-                    Sort.ORDER -> items.sortedBy { it.excelColumn.order }
+                    Sort.NAME -> items.sortedBy { it.name() }
+                    Sort.ORDER -> items.sortedBy { it.order }
                 }
             }
     }
@@ -109,6 +111,9 @@ abstract class AbstractExcelGenerator<T>(
             it.defaultRowHeight = defaultRowHeight
             if (freezePane) {
                 it.createFreezePane(0, 1)
+            }
+            for ((index, cellInfo) in cellInfos.withIndex()) {
+                it.setColumnWidth(index, cellInfo.width)
             }
         }
     }
@@ -232,7 +237,7 @@ abstract class AbstractExcelGenerator<T>(
             val cell = row.createCell(index)
 
             cell.cellStyle = headerCellStyle()
-            cell.setCellValue(cellInfo.excelColumn.value)
+            cell.setCellValue(cellInfo.name())
         }
     }
 

@@ -8,6 +8,9 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Random;
 
 @ExcelSheet(
@@ -44,6 +47,39 @@ public class Pojo {
 
     @ExcelColumn("long~~~~")
     private Long longggg = new Random().nextLong(1_000_000);
+
+    @ExcelColumn("date")
+    private LocalDate date = LocalDate.now();
+
+    @ExcelColumn(value = "date2", width = 4096)
+    private Date date2 = new Date();
+
+    public Date getDate2() {
+        return date2;
+    }
+
+    public void setDate2(final Date date2) {
+        this.date2 = date2;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(final LocalDate date) {
+        this.date = date;
+    }
+
+    @ExcelColumn("dateTime")
+    private LocalDateTime dateTime = LocalDateTime.now();
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(final LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
 
     public Long getLongggg() {
         return longggg;
