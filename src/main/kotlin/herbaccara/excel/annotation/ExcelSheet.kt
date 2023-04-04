@@ -15,5 +15,9 @@ annotation class ExcelSheet(
     val headerStyleClass: KClass<out ExcelCellStyle> = DefaultExcelCellStyle::class,
     val bodyStyle: ExcelStyle = ExcelStyle(),
     val bodyStyleClass: KClass<out ExcelCellStyle> = DefaultExcelCellStyle::class,
-    val fieldSort: Sort = Sort.NONE
+    val fieldSort: Sort = Sort.NONE,
+    /***
+     * 틀 고정 (헤더)
+     */
+    val freezePane: Boolean = false
 )

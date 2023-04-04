@@ -38,6 +38,7 @@ abstract class AbstractExcelGenerator<T>(
     protected val defaultSheetName: String
     protected val defaultColumnWidth: Int
     protected val defaultRowHeight: Short
+    protected val freezePane: Boolean
 
     protected val styles: MutableMap<String, CellStyle> = mutableMapOf()
 
@@ -48,6 +49,7 @@ abstract class AbstractExcelGenerator<T>(
         defaultSheetName = excelSheet.value.ifBlank { "Sheet" }
         defaultColumnWidth = excelSheet.columnWidth
         defaultRowHeight = excelSheet.rowHeight
+        freezePane = excelSheet.freezePane
 
         styles[DEFAULT_HEADER_STYLE] = if (excelSheet.headerStyleClass == DefaultExcelCellStyle::class) {
             createCellStyle(excelSheet.headerStyle)
@@ -105,6 +107,9 @@ abstract class AbstractExcelGenerator<T>(
         return workbook.createSheet("$defaultSheetName$suffix").also {
             it.defaultColumnWidth = defaultColumnWidth
             it.defaultRowHeight = defaultRowHeight
+            if (freezePane) {
+                it.createFreezePane(0, 1)
+            }
         }
     }
 

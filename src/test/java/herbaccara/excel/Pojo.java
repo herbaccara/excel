@@ -18,7 +18,8 @@ import java.util.Random;
                 borderStyle = BorderStyle.THIN,
                 fontBold = true
         ),
-        bodyStyleClass = BodyCellStyle.class
+        bodyStyleClass = BodyCellStyle.class,
+        freezePane = true
 )
 public class Pojo {
 
