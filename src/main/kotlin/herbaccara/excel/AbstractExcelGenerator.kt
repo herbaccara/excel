@@ -49,7 +49,7 @@ abstract class AbstractExcelGenerator<T>(
         defaultSheetName = excelSheet.value.ifBlank { "Sheet" }
         defaultColumnWidth = excelSheet.columnWidth
         defaultRowHeight = excelSheet.rowHeight
-        freezePane = excelSheet.freezePane
+        freezePane = excelSheet.freezeHeaderPane
 
         styles[DEFAULT_HEADER_STYLE] = if (excelSheet.headerStyleClass == DefaultExcelCellStyle::class) {
             createCellStyle(excelSheet.headerStyle)

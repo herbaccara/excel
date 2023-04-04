@@ -19,7 +19,7 @@ import java.util.Random;
                 fontBold = true
         ),
         bodyStyleClass = BodyCellStyle.class,
-        freezePane = true
+        freezeHeaderPane = true
 )
 public class Pojo {
 

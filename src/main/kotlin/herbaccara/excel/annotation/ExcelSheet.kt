@@ -19,5 +19,5 @@ annotation class ExcelSheet(
     /***
      * 틀 고정 (헤더)
      */
-    val freezePane: Boolean = false
+    val freezeHeaderPane: Boolean = false
 )
