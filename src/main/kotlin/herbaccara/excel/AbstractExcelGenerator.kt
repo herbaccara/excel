@@ -25,6 +25,7 @@ abstract class AbstractExcelGenerator<T>(
     companion object {
         private val DEFAULT_HEADER_STYLE = "${this::class.java.name}.DEFAULT_HEADER_STYLE"
         private val DEFAULT_BODY_STYLE = "${this::class.java.name}.DEFAULT_BODY_STYLE"
+        private val excelCellStyleMap: MutableMap<KClass<out ExcelCellStyle>, ExcelCellStyle> = mutableMapOf()
     }
 
     protected val workbook: Workbook = when (excelType) {
@@ -76,7 +77,7 @@ abstract class AbstractExcelGenerator<T>(
                         } else if (excelStyle != null) {
                             createCellStyle(excelStyle)
                         } else {
-                            createCellStyle().apply { cloneStyleFrom(bodyCellStyle()) }
+                            createCellStyle(bodyCellStyle())
                         }
 
                         // 0 이면 한번도 설정을 안한 상태
@@ -144,8 +145,13 @@ abstract class AbstractExcelGenerator<T>(
 
     protected fun createCellStyle(): CellStyle = workbook.createCellStyle()
 
+    protected fun createCellStyle(source: CellStyle): CellStyle =
+        workbook.createCellStyle().apply { cloneStyleFrom(source) }
+
     protected fun createCellStyle(excelStyleClass: KClass<out ExcelCellStyle>): CellStyle {
-        val excelCellStyle = excelStyleClass.createInstance()
+        val excelCellStyle = excelCellStyleMap.getOrPut(excelStyleClass) {
+            excelStyleClass.createInstance()
+        }
         return excelCellStyle.apply(workbook)
     }
 
