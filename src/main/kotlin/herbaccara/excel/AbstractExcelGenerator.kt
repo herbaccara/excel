@@ -19,7 +19,7 @@ import kotlin.reflect.full.createInstance
 
 abstract class AbstractExcelGenerator<T>(
     clazz: Class<T>,
-    excelType: ExcelType,
+    private val excelType: ExcelType,
     dataFormatStrategy: DataFormatStrategy
 ) : ExcelGenerator<T> {
 
@@ -44,6 +44,8 @@ abstract class AbstractExcelGenerator<T>(
     protected val styles: MutableMap<String, CellStyle> = mutableMapOf()
 
     protected val cellInfos: List<CellInfo>
+
+    override fun excelType(): ExcelType = excelType
 
     init {
         val excelSheet = requireNotNull(clazz.getAnnotation(ExcelSheet::class.java))
