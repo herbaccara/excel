@@ -47,6 +47,16 @@ abstract class AbstractExcelGenerator<T>(
 
     override fun excelType(): ExcelType = excelType
 
+    override fun fileExtension(): String = when (excelType) {
+        ExcelType.HSSF -> "xls"
+        ExcelType.XSSF, ExcelType.SXSSF -> "xlsx"
+    }
+
+    override fun mediaType(): String = when (excelType) {
+        ExcelType.HSSF -> "application/vnd.ms-excel"
+        ExcelType.XSSF, ExcelType.SXSSF -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    }
+
     init {
         val excelSheet = requireNotNull(clazz.getAnnotation(ExcelSheet::class.java))
         defaultSheetName = excelSheet.value.ifBlank { "Sheet" }
