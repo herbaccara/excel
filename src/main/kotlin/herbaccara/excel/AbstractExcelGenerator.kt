@@ -2,6 +2,8 @@ package herbaccara.excel
 
 import herbaccara.excel.annotation.*
 import herbaccara.excel.dataformat.DataFormatStrategy
+import herbaccara.excel.extension.setBorder
+import herbaccara.excel.extension.setBorderColor
 import herbaccara.excel.style.DefaultExcelCellStyle
 import herbaccara.excel.style.ExcelCellStyle
 import org.apache.poi.common.usermodel.HyperlinkType
@@ -202,15 +204,9 @@ abstract class AbstractExcelGenerator<T>(
             alignment = excelStyle.alignment
             verticalAlignment = excelStyle.verticalAlignment
 
-            borderTop = excelStyle.borderStyle
-            borderLeft = excelStyle.borderStyle
-            borderRight = excelStyle.borderStyle
-            borderBottom = excelStyle.borderStyle
+            setBorder(excelStyle.borderStyle)
 
-            topBorderColor = excelStyle.borderColor.index
-            leftBorderColor = excelStyle.borderColor.index
-            rightBorderColor = excelStyle.borderColor.index
-            bottomBorderColor = excelStyle.borderColor.index
+            setBorderColor(excelStyle.borderColor.index)
 
             shrinkToFit = excelStyle.shrinkToFit
             wrapText = excelStyle.wrapText
