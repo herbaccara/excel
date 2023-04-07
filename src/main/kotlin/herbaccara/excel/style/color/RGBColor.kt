@@ -8,7 +8,5 @@ data class RGBColor(val red: Byte, val green: Byte, val blue: Byte) {
         }
     }
 
-    fun byteArray(): ByteArray {
-        return byteArrayOf(red, green, blue)
-    }
+    fun byteArray(): ByteArray = byteArrayOf(red, green, blue)
 }
